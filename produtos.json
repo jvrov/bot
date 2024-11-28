@@ -1,0 +1,32 @@
+[
+    {
+        "nome": "Processador AMD Ryzen 7 5800X, 3.8GHz (4.7GHz Max Turbo), Cache 36MB, Octa Core, 16 Threads, AM4 - 100-100000063WOF",
+        "url": "https://www.kabum.com.br/produto/129459/processador-amd-ryzen-7-5800x-3-8ghz-4-7ghz-max-turbo-cache-36mb-octa-core-16-threads-am4-100-100000063wof",
+        "preco_alvo": 1500.0
+    },
+    {
+        "nome": "Xbox Series X",
+        "url": "https://www.magazineluiza.com.br/...",
+        "preco_alvo": 3800.0
+    },
+    {
+        "nome": "Console PlayStation 5 Slim Sony, SSD 1TB, Edi\u00c3\u00a7\u00c3\u00a3o Digital, Com Controle Sem Fio DualSense, Branco + 2 Jogos Digitais - 1000038914",
+        "url": "https://www.kabum.com.br/produto/542929/console-playstation-5-slim-sony-ssd-1tb-edicao-digital-com-controle-sem-fio-dualsense-branco-2-jogos-digitais-1000038914",
+        "preco_alvo": 2200.0
+    },
+    {
+        "nome": "Processador AMD Ryzen 5 5600X, 3.7GHz (4.6GHz Max Turbo), Cache 35MB, 6 N\u00c3\u00bacleos, 12 Threads, AM4 - 100-100000065BOX",
+        "url": "https://www.kabum.com.br/produto/129451/processador-amd-ryzen-5-5600x-3-7ghz-4-6ghz-max-turbo-cache-35mb-6-nucleos-12-threads-am4-100-100000065box",
+        "preco_alvo": 1000.0
+    },
+    {
+        "nome": "Placa M\u00c3\u00a3e Asus TUF GAMING A520M-PLUS II, AMD AM4, mATX, DDR4",
+        "url": "https://www.kabum.com.br/produto/165133/placa-mae-asus-tuf-gaming-a520m-plus-ii-amd-am4-matx-ddr4",
+        "preco_alvo": 6000.0
+    },
+    {
+        "nome": "controle",
+        "url": "https://www.kabum.com.br/produto/161471/controle-sony-dualsense-ps5-sem-fio-midnight-black-3006452",
+        "preco_alvo": 400.0
+    }
+]
