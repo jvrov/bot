@@ -1,54 +1,54 @@
 # 🤖 Price Monitor Bot
 
-> Monitor de preços automatizado com interface web moderna e notificações em tempo real.
+> Monitore preços online e receba alertas quando alcançarem o valor desejado!
 
-## 📊 Sobre o Projeto
+## 📋 Sobre
 
-O Price Monitor Bot é uma solução elegante para monitoramento de preços online, desenvolvida com Python e uma interface web moderna. O bot permite que você acompanhe os preços dos seus produtos favoritos e receba notificações quando atingirem o valor desejado.
+O **Price Monitor Bot** é uma ferramenta prática e eficiente para acompanhar os preços dos seus produtos favoritos. Com uma interface moderna e notificações em tempo real, você nunca perderá uma boa oferta.
 
-## ✨ Características
+## ✨ Funcionalidades
 
-- 🎯 **Monitoramento Preciso**: Acompanhamento em tempo real dos preços
-- 📱 **Interface Responsiva**: Design moderno adaptável a qualquer dispositivo
-- 🌓 **Modo Claro/Escuro**: Interface adaptável à sua preferência
-- 📧 **Notificações por Email**: Alertas automáticos quando o preço atingir o valor alvo
-- 📊 **Dashboard Intuitivo**: Visualização clara das suas configurações e monitoramentos
-- 🔄 **Atualizações Automáticas**: Verificação periódica dos preços
-- 📈 **Histórico de Preços**: Acompanhamento da evolução dos valores
+- 🎯 **Monitoramento de Preços**: Verifique preços automaticamente.
+- 🌓 **Modo Claro/Escuro**: Interface adaptável ao seu estilo.
+- 📧 **Alertas por Email**: Notificações quando o preço atingir seu alvo.
+- 📊 **Dashboard Intuitivo**: Visualize suas configurações e histórico de preços.
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Tecnologias
 
-- **Backend**: Python 3.x | Flask
-- **Frontend**: HTML5 | CSS3 | JavaScript
-- **UI Framework**: Bootstrap 5
+- **Backend**: Python (Flask)
+- **Frontend**: HTML, CSS, JavaScript
+- **UI Framework**: Bootstrap
 - **Ícones**: Font Awesome
 - **Alertas**: SweetAlert2
-- **Estilização**: CSS Custom Properties
 
-## 🚀 Funcionalidades
+## 🚀 Como Usar
 
-1. **Monitoramento Inteligente**
-   - Configuração de preço alvo
-   - Verificação automática de preços
-   - Sistema de notificações personalizável
+1. **Clone o repositório**:
 
-2. **Interface Moderna**
-   - Dashboard responsivo
-   - Modo escuro/claro
-   - Animações suaves
-   - Feedback visual em tempo real
+   ```bash
+   git clone https://github.com/seu-usuario/price-monitor-bot.git
+   ```
 
-3. **Gestão de Produtos**
-   - Adicionar/remover produtos
-   - Configurar preços alvo
-   - Visualizar histórico de preços
-   - Status em tempo real
+2. **Instale as dependências**:
 
-4. **Sistema de Notificações**
-   - Alertas por email
-   - Notificações na interface
-   - Histórico de alertas
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-## 📦 Instalação e Uso
+3. **Inicie o servidor**:
 
-1. **Clone o repositório**
+   ```bash
+   flask run
+   ```
+
+4. **Acesse no navegador**:
+
+   [http://localhost:5000](http://localhost:5000)
+
+## 🌐 Demonstração
+
+Acesse o projeto online: [Price Monitor Bot](https://bot-theta-pearl.vercel.app). O projeto utiliza um banco de dados virtual e está hospedado na Vercel para acesso rápido e confiável.
+
+---
+
+💡 **Dica**: Personalize as notificações e ajustes para monitorar os produtos do jeito que quiser!
