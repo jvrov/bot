@@ -6,6 +6,7 @@
     <title>Monitor de Preços - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-color: #2563eb;
@@ -39,6 +40,11 @@
             --shadow-color: rgba(0, 0, 0, 0.3);
             --label-color: #ffffff;
             --title-color: #ffffff;
+            --modal-bg: #1a1a1a;
+            --modal-text: #ffffff;
+            --input-bg-dark: #2d2d2d;
+            --input-text-dark: #ffffff;
+            --input-border-dark: #404040;
         }
 
         * {
@@ -49,111 +55,93 @@
             background-color: var(--background-color);
             color: var(--text-color);
             min-height: 100vh;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            padding-bottom: 60px;
         }
 
         .navbar {
-            background-color: var(--card-bg);
-            box-shadow: 0 2px 4px var(--shadow-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 2rem 2rem;
         }
 
         .card {
-            background-color: var(--card-bg);
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px var(--shadow-color);
-            margin-bottom: 20px;
-            transition: transform 0.3s ease;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
         }
 
         .card-header {
-            background-color: var(--card-bg);
+            background: transparent;
             border-bottom: 1px solid var(--border-color);
-            color: var(--text-color);
-            padding: 1.25rem;
-            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
         }
 
-        .btn {
-            border-radius: 8px;
-            padding: 10px 20px;
-            transition: all 0.3s ease;
-        }
-
-        .form-control {
-            background-color: var(--input-bg);
-            border-color: var(--input-border);
-            color: var(--text-color);
-            border-radius: 8px;
-            padding: 12px 15px;
-        }
-
-        .form-control:focus {
-            background-color: var(--input-bg);
-            border-color: var(--primary-color);
-            color: var(--text-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .input-group-text {
-            background-color: var(--input-bg);
-            border-color: var(--input-border);
-            color: var(--text-color);
-        }
-
-        .produto-card {
-            background-color: var(--card-bg);
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            border-left: 4px solid var(--primary-color);
-            transition: transform 0.3s ease;
-        }
-
-        .produto-card:hover {
-            transform: translateX(5px);
-        }
-
-        .status-badge {
-            background-color: var(--input-bg);
-            color: var(--text-color);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85em;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .dashboard-header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white !important;
-            padding: 2rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px var(--shadow-color);
+        .card-header h5 {
+            margin: 0;
+            font-weight: 600;
         }
 
         .stats-card {
-            background-color: var(--card-bg);
             padding: 1.5rem;
-            border-radius: 12px;
             text-align: center;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .stats-icon {
+            font-size: 2.5rem;
             margin-bottom: 1rem;
         }
 
         .stats-number {
             font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
+            font-weight: 600;
         }
 
-        .stats-label {
-            color: var(--text-muted);
+        .quick-action-btn {
+            padding: 1rem;
+            border-radius: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .site-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .site-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .site-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 1rem;
         }
 
         .theme-switch {
@@ -180,6 +168,25 @@
 
         [data-theme="dark"] .theme-switch .btn {
             color: var(--warning-color);
+        }
+        
+        .input-group-text {
+            background-color: var(--input-bg);
+            border-color: var(--input-border);
+            color: var(--text-color);
+        }
+
+        .form-label {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .form-control:focus + .input-group-text {
+            border-color: var(--primary-color);
         }
 
         .loading-overlay {
@@ -255,11 +262,201 @@
         [data-theme="dark"] a:hover {
             color: var(--secondary-color);
         }
+
+        .card {
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .bg-primary, .bg-success, .bg-info {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) !important;
+        }
+
+        .opacity-50 {
+            opacity: 0.5;
+        }
+
+        .border {
+            border-color: var(--border-color) !important;
+        }
+
+        .img-fluid {
+            filter: grayscale(0.5);
+            transition: filter 0.3s;
+        }
+
+        .img-fluid:hover {
+            filter: grayscale(0);
+        }
+
+        .dashboard-stats .card {
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .quick-actions .btn {
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: 500;
+        }
+
+        .sites-supported .site-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .sites-supported .site-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .sites-supported .site-card img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .card {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        [data-theme="dark"] .card {
+            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+        }
+
+        [data-theme="dark"] .sites-supported .site-card {
+            background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+        }
+
+        #lastUpdate {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .form-label {
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .text-muted {
+            color: var(--text-muted) !important;
+        }
+
+        .form-control:focus + .input-group-text {
+            border-color: var(--primary-color);
+        }
+
+        .stats-card {
+            background: var(--primary-color);
+            color: white;
+            border-radius: 15px;
+        }
+
+        .stats-card .stats-content {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stats-card .stats-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-card .stats-number {
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .stats-card .stats-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            color: white !important;
+        }
+
+        [data-theme="dark"] .modal-content {
+            background-color: var(--modal-bg);
+            color: var(--modal-text);
+        }
+
+        [data-theme="dark"] .modal-header {
+            border-bottom-color: var(--input-border-dark);
+        }
+
+        [data-theme="dark"] .modal-footer {
+            border-top-color: var(--input-border-dark);
+        }
+
+        [data-theme="dark"] .form-control {
+            background-color: var(--input-bg-dark);
+            border-color: var(--input-border-dark);
+            color: var(--input-text-dark);
+        }
+
+        [data-theme="dark"] .form-control:focus {
+            background-color: var(--input-bg-dark);
+            border-color: var(--primary-color);
+            color: var(--input-text-dark);
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+        }
+
+        [data-theme="dark"] .input-group-text {
+            background-color: var(--input-bg-dark);
+            border-color: var(--input-border-dark);
+            color: var(--input-text-dark);
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: #a0aec0 !important;
+        }
+
+        [data-theme="dark"] .form-label {
+            color: var(--modal-text);
+        }
+
+        [data-theme="dark"] .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+
+        [data-theme="dark"] .btn-secondary {
+            background-color: #4a5568;
+            border-color: #4a5568;
+            color: white;
+        }
+
+        [data-theme="dark"] .btn-secondary:hover {
+            background-color: #2d3748;
+            border-color: #2d3748;
+        }
+
+        [data-theme="dark"] .form-control::placeholder {
+            color: #718096;
+        }
     </style>
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg mb-4">
+    <nav class="navbar navbar-expand-lg mb-0">
         <div class="container">
             <a class="navbar-brand" href="#">
                 <i class="fas fa-chart-line me-2"></i>
@@ -268,113 +465,153 @@
         </div>
     </nav>
 
+    <!-- Welcome Section -->
+    <section class="welcome-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-3">Bem-vindo ao Monitor de Preços</h1>
+            <p class="lead mb-0">Acompanhe os preços dos seus produtos favoritos e receba alertas quando eles ficarem mais baratos!</p>
+        </div>
+    </section>
+
     <div class="container">
-        <!-- Dashboard Header -->
-        <div class="dashboard-header">
-            <h1 class="display-5 fw-bold mb-3">Dashboard de Monitoramento</h1>
-            <p class="lead mb-0">Acompanhe e gerencie seus produtos em tempo real</p>
+        <!-- Email Configuration -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="fas fa-envelope me-2"></i>Configuração de Email</h5>
+            </div>
+            <div class="card-body">
+                <form id="formEmail" class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label for="email" class="form-label">Email para notificações</label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="seu@email.com" value="{{ email_destinatario or '' }}" required>
+                        </div>
+                        <small class="text-muted">Você receberá notificações quando os preços atingirem o valor desejado</small>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save me-2"></i>Salvar Email
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <!-- Stats Row -->
         <div class="row mb-4">
             <div class="col-md-4">
-                <div class="stats-card">
-                    <i class="fas fa-shopping-cart fa-2x mb-3 text-primary"></i>
-                    <div class="stats-number">{{ produtos|length }}</div>
-                    <div class="stats-label">Produtos Monitorados</div>
+                <div class="card stats-card h-100">
+                    <div class="stats-content">
+                        <i class="fas fa-box stats-icon"></i>
+                        <div class="stats-number">{{ produtos|length }}</div>
+                        <div class="stats-label">Produtos Monitorados</div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stats-card">
-                    <i class="fas fa-clock fa-2x mb-3 text-warning"></i>
-                    <div class="stats-number" id="lastUpdate">--:--</div>
-                    <div class="stats-label">Última Atualização</div>
+                <div class="card stats-card h-100">
+                    <div class="stats-content">
+                        <i class="fas fa-check-circle stats-icon"></i>
+                        <div class="stats-number">Ativo</div>
+                        <div class="stats-label">Status do Sistema</div>
+                    </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stats-card">
-                    <i class="fas fa-bell fa-2x mb-3 text-success"></i>
-                    <div class="stats-number" id="alertCount">0</div>
-                    <div class="stats-label">Alertas Enviados</div>
+                <div class="card stats-card h-100">
+                    <div class="stats-content">
+                        <i class="fas fa-clock stats-icon"></i>
+                        <div class="stats-number" id="lastUpdate">--:--</div>
+                        <div class="stats-label">Última Verificação</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Configurações de Email -->
+        <!-- Quick Actions -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-envelope me-2"></i>Configurações de Email
-                </h5>
+                <h5><i class="fas fa-bolt me-2"></i>Ações Rápidas</h5>
             </div>
             <div class="card-body">
-                <form id="formEmail">
-                    <div class="mb-3">
-                        <label for="email_destinatario" class="form-label">Email para receber notificações</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-at"></i></span>
-                            <input type="email" class="form-control" id="email_destinatario" 
-                                   name="email_destinatario" value="{{ email_destinatario }}" required>
-                        </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <button class="btn btn-primary w-100 quick-action-btn" onclick="iniciarMonitoramento()">
+                            <i class="fas fa-play me-2"></i>Iniciar Monitoramento
+                        </button>
                     </div>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-2"></i>Salvar Configurações
-                    </button>
-                </form>
+                    <div class="col-md-4">
+                        <button class="btn btn-success w-100 quick-action-btn" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                            <i class="fas fa-plus me-2"></i>Adicionar Produto
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-info w-100 quick-action-btn" onclick="window.location.reload()">
+                            <i class="fas fa-sync me-2"></i>Atualizar Página
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Adicionar Novo Produto -->
+        <!-- Sites Suportados -->
         <div class="card mb-4">
             <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-plus-circle me-2"></i>Adicionar Novo Produto
-                </h5>
+                <h5><i class="fas fa-shopping-cart me-2"></i>Sites Suportados</h5>
             </div>
             <div class="card-body">
-                <form id="formProduto">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="nome" class="form-label">Nome do Produto</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-tag"></i></span>
-                                <input type="text" class="form-control" id="nome" name="nome" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="url" class="form-label">URL do Produto</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-link"></i></span>
-                                <input type="url" class="form-control" id="url" name="url" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label for="preco_alvo" class="form-label">Preço Alvo (R$)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">R$</span>
-                                <input type="number" step="0.01" class="form-control" id="preco_alvo" 
-                                       name="preco_alvo" required>
-                            </div>
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="site-card">
+                            <img src="https://logo.clearbit.com/amazon.com.br" alt="Amazon" class="site-logo">
+                            <h5>Amazon</h5>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-plus me-2"></i>Adicionar Produto
-                    </button>
-                </form>
+                    <div class="col-md-3">
+                        <div class="site-card">
+                            <img src="https://logo.clearbit.com/mercadolivre.com.br" alt="Mercado Livre" class="site-logo">
+                            <h5>Mercado Livre</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="site-card">
+                            <img src="https://logo.clearbit.com/kabum.com.br" alt="Kabum" class="site-logo">
+                            <h5>Kabum</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="site-card">
+                            <img src="https://logo.clearbit.com/magazineluiza.com.br" alt="Magalu" class="site-logo">
+                            <h5>Magazine Luiza</h5>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Lista de Produtos -->
+        <!-- Produtos Monitorados -->
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-list me-2"></i>Produtos Monitorados
-                </h5>
+                <h5><i class="fas fa-list me-2"></i>Produtos Monitorados</h5>
                 <button class="btn btn-primary" onclick="iniciarMonitoramento()">
                     <i class="fas fa-play me-2"></i>Iniciar Monitoramento
                 </button>
             </div>
             <div class="card-body">
+                {% if produtos|length == 0 %}
+                <div class="text-center py-5">
+                    <i class="fas fa-box-open fa-3x mb-3 text-muted"></i>
+                    <h4>Nenhum produto monitorado</h4>
+                    <p class="text-muted">Adicione produtos para começar o monitoramento</p>
+                    <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                        <i class="fas fa-plus me-2"></i>Adicionar Produto
+                    </button>
+                </div>
+                {% else %}
                 <div id="listaProdutos">
                     {% for produto in produtos %}
                     <div class="produto-card">
@@ -384,7 +621,7 @@
                                 <div class="mb-2">
                                     <span class="status-badge me-2">
                                         <i class="fas fa-tag"></i>
-                                        R$ {{ "%.2f"|format(produto.preco_alvo) }}
+                                        R$ {{ "%.2f"|format(produto.preco_desejado) }}
                                     </span>
                                     <span class="status-badge">
                                         <i class="fas fa-clock"></i>
@@ -407,13 +644,9 @@
                     </div>
                     {% endfor %}
                 </div>
+                {% endif %}
             </div>
         </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
     </div>
 
     <!-- Theme Switch -->
@@ -423,267 +656,57 @@
         </button>
     </div>
 
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        // Atualiza o horário da última atualização
-        function updateLastUpdate() {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString();
-            document.getElementById('lastUpdate').textContent = timeString;
-        }
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 
-        // Toggle do tema claro/escuro
-        function toggleTheme() {
-            const body = document.body;
-            const currentTheme = body.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon();
-        }
-
-        // Atualiza o ícone do tema
-        function updateThemeIcon() {
-            const themeIcon = document.querySelector('.theme-switch i');
-            const currentTheme = document.body.getAttribute('data-theme');
-            themeIcon.className = currentTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-
-        // Carrega o tema salvo
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-        updateThemeIcon();
-
-        // Loading overlay
-        function showLoading() {
-            document.getElementById('loadingOverlay').style.display = 'flex';
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-
-        // Alertas melhorados
-        function showAlert(title, text, icon) {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            Swal.fire({
-                title: title,
-                text: text,
-                icon: icon,
-                confirmButtonColor: '#2563eb',
-                background: isDark ? '#1f2937' : '#ffffff',
-                color: isDark ? '#ffffff' : '#000000'
-            });
-        }
-
-        // Formulário de produto
-        document.getElementById('formProduto').onsubmit = function(e) {
-            e.preventDefault();
-            showLoading();
-            const formData = new FormData(e.target);
-            
-            fetch('/adicionar_produto', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                hideLoading();
-                if (data.success) {
-                    showAlert('Sucesso!', data.message, 'success');
-                    location.reload();
-                } else {
-                    showAlert('Erro!', data.message, 'error');
-                }
-            })
-            .catch(error => {
-                hideLoading();
-                showAlert('Erro!', 'Ocorreu um erro ao adicionar o produto.', 'error');
-            });
-        };
-
-        // Formulário de email
-        document.getElementById('formEmail').onsubmit = function(e) {
-            e.preventDefault();
-            showLoading();
-            const formData = new FormData(e.target);
-            
-            fetch('/atualizar_email', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                hideLoading();
-                if (data.success) {
-                    showAlert('Sucesso!', data.message, 'success');
-                } else {
-                    showAlert('Erro!', data.message, 'error');
-                }
-            })
-            .catch(error => {
-                hideLoading();
-                showAlert('Erro!', 'Ocorreu um erro ao atualizar o email.', 'error');
-            });
-        };
-
-        // Remover produto
-        function removerProduto(index) {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            Swal.fire({
-                title: 'Tem certeza?',
-                text: "Você não poderá reverter esta ação!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#ef4444',
-                cancelButtonColor: '#6b7280',
-                confirmButtonText: 'Sim, remover!',
-                cancelButtonText: 'Cancelar',
-                background: isDark ? '#1f2937' : '#ffffff',
-                color: isDark ? '#ffffff' : '#000000'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    showLoading();
-                    const formData = new FormData();
-                    formData.append('index', index);
-                    
-                    fetch('/remover_produto', {
-                        method: 'POST',
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        hideLoading();
-                        if (data.success) {
-                            showAlert('Removido!', data.message, 'success');
-                            location.reload();
-                        } else {
-                            showAlert('Erro!', data.message, 'error');
-                        }
-                    })
-                    .catch(error => {
-                        hideLoading();
-                        showAlert('Erro!', 'Ocorreu um erro ao remover o produto.', 'error');
-                    });
-                }
-            });
-        }
-
-        // Iniciar monitoramento
-        function iniciarMonitoramento() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            let progress = 0;
-            
-            Swal.fire({
-                title: 'Monitorando produtos',
-                html: `
-                    <div class="progress mb-3" style="height: 20px;">
-                        <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                             role="progressbar" style="width: 0%">
-                            0%
+    <!-- Modal Adicionar Produto -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProductModalLabel">
+                        <i class="fas fa-plus-circle me-2"></i>Adicionar Novo Produto
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formProduto">
+                        <div class="mb-3">
+                            <label for="nome" class="form-label">Nome do Produto</label>
+                            <input type="text" class="form-control" id="nome" name="nome" required>
                         </div>
-                    </div>
-                    <div id="status-text">Iniciando monitoramento...</div>
-                `,
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                background: isDark ? '#1f2937' : '#ffffff',
-                color: isDark ? '#ffffff' : '#000000',
-                didOpen: () => {
-                    fetch('/iniciar_monitoramento', {
-                        method: 'POST'
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Atualiza a barra de progresso para 100%
-                            const progressBar = Swal.getHtmlContainer().querySelector('.progress-bar');
-                            progressBar.style.width = '100%';
-                            progressBar.textContent = '100%';
-                            
-                            // Mostra resultados
-                            setTimeout(() => {
-                                Swal.fire({
-                                    title: 'Monitoramento Concluído!',
-                                    html: gerarRelatorioHTML(data.resultados),
-                                    icon: 'success',
-                                    confirmButtonColor: '#2563eb',
-                                    background: isDark ? '#1f2937' : '#ffffff',
-                                    color: isDark ? '#ffffff' : '#000000'
-                                });
-                                updateLastUpdate();
-                            }, 500);
-                        } else {
-                            Swal.fire({
-                                title: 'Erro!',
-                                text: data.message,
-                                icon: 'error',
-                                confirmButtonColor: '#2563eb',
-                                background: isDark ? '#1f2937' : '#ffffff',
-                                color: isDark ? '#ffffff' : '#000000'
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        Swal.fire({
-                            title: 'Erro!',
-                            text: 'Ocorreu um erro ao iniciar o monitoramento.',
-                            icon: 'error',
-                            confirmButtonColor: '#2563eb',
-                            background: isDark ? '#1f2937' : '#ffffff',
-                            color: isDark ? '#ffffff' : '#000000'
-                        });
-                    });
-                }
-            });
-        }
-
-        function gerarRelatorioHTML(resultados) {
-            let html = '<div class="text-start">';
-            let alertas = 0;
-            let erros = 0;
-            
-            resultados.forEach(resultado => {
-                const icon = resultado.status === 'alerta_enviado' ? '🔔' :
-                            resultado.status === 'erro' ? '❌' : '✅';
-                
-                html += `<div class="mb-2">
-                    ${icon} <strong>${resultado.nome}</strong><br>`;
-                
-                if (resultado.status === 'alerta_enviado') {
-                    html += `<small class="text-success">Alerta enviado! Preço atual: R$${resultado.preco_atual}</small>`;
-                    alertas++;
-                } else if (resultado.status === 'erro') {
-                    html += `<small class="text-danger">Erro: ${resultado.erro}</small>`;
-                    erros++;
-                } else {
-                    html += `<small class="text-muted">Preço atual: R$${resultado.preco_atual}</small>`;
-                }
-                
-                html += '</div>';
-            });
-            
-            html += `<hr>
-                <div class="text-center">
-                    <strong>Resumo:</strong><br>
-                    Total verificado: ${resultados.length}<br>
-                    Alertas enviados: ${alertas}<br>
-                    Erros: ${erros}
-                </div>`;
-            
-            html += '</div>';
-            return html;
-        }
-
-        // Ver histórico (função placeholder)
-        function verHistorico(index) {
-            showAlert('Em desenvolvimento', 'Função de histórico será implementada em breve!', 'info');
-        }
-
-        // Atualiza o horário a cada minuto
-        setInterval(updateLastUpdate, 60000);
-        updateLastUpdate();
-    </script>
+                        <div class="mb-3">
+                            <label for="url" class="form-label">URL do Produto</label>
+                            <input type="url" class="form-control" id="url" name="url" required>
+                            <small class="text-muted">Insira o link do produto de uma das lojas suportadas</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="preco_desejado" class="form-label">Preço Desejado</label>
+                            <div class="input-group">
+                                <span class="input-group-text">R$</span>
+                                <input type="number" class="form-control" id="preco_desejado" name="preco_desejado" 
+                                       step="0.01" min="0" required>
+                            </div>
+                            <small class="text-muted">Você será notificado quando o preço atingir este valor</small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Cancelar
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="adicionarProduto()">
+                        <i class="fas fa-plus me-2"></i>Adicionar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
