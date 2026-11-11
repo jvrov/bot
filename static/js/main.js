@@ -4,7 +4,7 @@
    Estado e utilidades
    ========================================================================== */
 const state = {
-    produtos: [], email: null, emailConfigurado: true, ia: false,
+    produtos: [], email: null, emailConfigurado: true,
     lojas: {}, lojasBusca: [],
     busca: null,           // { id, texto, interp, ofertas, compat, erros }
     filtro: 'todos', ordemOfertas: 'preco',
@@ -205,7 +205,7 @@ async function buscar(texto) {
         const { interpretacao } = await api('/api/interpretar', { method: 'POST', body: { texto } });
         if (!atual()) return;
         state.busca.interp = interpretacao;
-        marcarPasso('ia', 'done', interpretacao.ia ? '· IA' : '');
+        marcarPasso('ia', 'done');
         $('#resumoBusca').textContent = interpretacao.resumo || `Procurando ${interpretacao.termo_busca}`;
         $('#tagsBusca').innerHTML = [
             `<span class="tag"><i class="fa-solid fa-magnifying-glass"></i>${esc(interpretacao.termo_busca)}</span>`,
@@ -626,8 +626,7 @@ $('#btnConfig').addEventListener('click', async () => {
             <input class="input" type="email" id="dlgEmail" placeholder="voce@exemplo.com" value="${esc(state.email || '')}">
             <small>Enviamos um aviso quando um alerta atingir o preço que você quer.</small></div>
             ${state.emailConfigurado ? '' : '<div class="notice"><i class="fa-solid fa-triangle-exclamation"></i>O servidor ainda não tem um remetente configurado (EMAIL_USER / EMAIL_PASSWORD).</div>'}
-            <p class="dialog-note" style="margin-top:12px"><i class="fa-solid fa-wand-magic-sparkles"></i>
-            Busca inteligente: ${state.ia ? '<strong style="color:var(--ok)">ligada (IA)</strong>' : '<strong>modo simples</strong> (configure ANTHROPIC_API_KEY para usar IA)'}</p>`,
+`,
         rodape: `<button class="btn btn-ghost" value="teste" ${state.email ? '' : 'disabled'}><i class="fa-regular fa-paper-plane"></i> Email de teste</button>
                  <button class="btn btn-primary" value="ok">Salvar</button>`,
         validar: (v) => {
@@ -658,9 +657,8 @@ async function carregar() {
         const d = await api('/api/estado');
         Object.assign(state, {
             produtos: d.produtos, email: d.email, emailConfigurado: d.email_configurado,
-            ia: d.ia, lojas: d.lojas, lojasBusca: d.lojas_busca,
+            lojas: d.lojas, lojasBusca: d.lojas_busca,
         });
-        $('#iaBadge').textContent = d.ia ? 'Busca inteligente com IA' : 'Busca inteligente';
         atualizarStatusEmail();
         renderPainel();
     } catch (e) {

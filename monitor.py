@@ -7,8 +7,8 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
-import ai
 import notifier
+import pedido
 import scraper
 import search
 
@@ -88,7 +88,7 @@ def run_search(product: dict) -> scraper.ScrapeResult:
     if not ofertas:
         detalhe = "; ".join(f"{search.SUPPORTED_STORES[k]}: {v}" for k, v in erros.items())
         return scraper.ScrapeResult(price=None, error=f"Nenhuma loja respondeu ({detalhe})")
-    compativeis, _ = ai.filter_offers(product["texto"], interp, ofertas)
+    compativeis = pedido.filter_offers(product["texto"], interp, ofertas)
     return update_search_offers(product, compativeis)
 
 

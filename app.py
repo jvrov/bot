@@ -11,8 +11,8 @@ from functools import wraps
 
 from flask import Flask, g, jsonify, render_template, request
 
-import ai
 import monitor
+import pedido
 import notifier
 import scraper
 import search
@@ -119,7 +119,6 @@ def health():
         "email_password_definido": bool(os.getenv("EMAIL_PASSWORD")),
         "banco": type(repo.store).__name__,
         "cron_configurado": bool(os.getenv("CRON_SECRET")),
-        "ia_configurada": ai.ai_enabled(),
         "ambiente": os.getenv("VERCEL_ENV", "local"),
     })
 
@@ -137,7 +136,6 @@ def estado():
         "produtos": load_products(),
         "lojas": scraper.SUPPORTED_STORES,
         "lojas_busca": list(search.STORES),
-        "ia": ai.ai_enabled(),
     })
 
 
@@ -178,7 +176,7 @@ def interpretar():
     texto = (request.get_json().get("texto") or "").strip()
     if len(texto) < 3:
         return error("Descreva o que você procura")
-    return jsonify({"success": True, "interpretacao": ai.interpret(texto)})
+    return jsonify({"success": True, "interpretacao": pedido.interpret(texto)})
 
 
 @app.post("/api/buscar")
@@ -206,8 +204,8 @@ def filtrar():
     interp = _clean_interp(data.get("interpretacao"))
     ofertas = [o for o in map(_clean_offer, (data.get("ofertas") or [])[:200]) if o] \
         if isinstance(data.get("ofertas"), list) else []
-    compativeis, usou_ia = ai.filter_offers(texto, interp, ofertas)
-    return jsonify({"success": True, "ofertas": compativeis, "total": len(ofertas), "ia": usou_ia})
+    compativeis = pedido.filter_offers(texto, interp, ofertas)
+    return jsonify({"success": True, "ofertas": compativeis, "total": len(ofertas)})
 
 
 @app.post("/api/email")

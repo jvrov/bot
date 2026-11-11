@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-import ai
 import monitor
+import pedido
 import notifier
 import search
 
@@ -11,14 +11,8 @@ import search
 # --------------------------------------------------------------------------
 # Interpretação (modo sem IA)
 # --------------------------------------------------------------------------
-@pytest.fixture(autouse=True)
-def sem_ia(monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-
-
 def test_interpret_heuristic_monitor():
-    r = ai.interpret("quero um monitor de 280hz de 25 polegadas até R$ 1.500")
-    assert r["ia"] is False
+    r = pedido.interpret("quero um monitor de 280hz de 25 polegadas até R$ 1.500")
     assert r["preco_maximo"] == 1500
     assert "monitor" in r["termo_busca"] and "280hz" in r["termo_busca"]
     assert "1.500" not in r["termo_busca"] and "1500" not in r["termo_busca"]
@@ -33,11 +27,11 @@ def test_interpret_heuristic_monitor():
     ("placa de vídeo rtx 4060", None),
 ])
 def test_extract_price(texto, preco):
-    assert ai.extract_price(texto) == preco
+    assert pedido.extract_price(texto) == preco
 
 
 def test_filter_heuristic_tolerates_24_5_inches_and_rejects_accessories():
-    interp = ai.interpret_heuristic("monitor 280hz 25 polegadas")
+    interp = pedido.interpret("monitor 280hz 25 polegadas")
     ofertas = [
         {"titulo": 'Monitor Gamer AOC 24,5" 280Hz IPS 1ms', "preco": 1199.0},
         {"titulo": "Monitor Gamer 27 polegadas 280Hz", "preco": 1500.0},
@@ -45,18 +39,18 @@ def test_filter_heuristic_tolerates_24_5_inches_and_rejects_accessories():
         {"titulo": 'Suporte articulado para monitor 25" 280hz', "preco": 99.0},
         {"titulo": 'Monitor LG UltraGear 25 pol 280 Hz', "preco": 1300.0},
     ]
-    out = ai.filter_heuristic("monitor 280hz 25 polegadas", interp, ofertas)
+    out = pedido.filter_offers("monitor 280hz 25 polegadas", interp, ofertas)
     titulos = [o["titulo"] for o in out]
     assert titulos == ['Monitor Gamer AOC 24,5" 280Hz IPS 1ms', "Monitor LG UltraGear 25 pol 280 Hz"]
     assert all(o["motivo"] for o in out)
 
 
 def test_filter_offers_sorts_by_price():
-    interp = ai.interpret_heuristic("ssd 1tb")
+    interp = pedido.interpret("ssd 1tb")
     ofertas = [{"titulo": "SSD Kingston 1TB NVMe", "preco": 450.0},
                {"titulo": "SSD WD 1TB SATA", "preco": 380.0}]
-    out, usou_ia = ai.filter_offers("ssd 1tb", interp, ofertas)
-    assert not usou_ia and [o["preco"] for o in out] == [380.0, 450.0]
+    out = pedido.filter_offers("ssd 1tb", interp, ofertas)
+    assert [o["preco"] for o in out] == [380.0, 450.0]
 
 
 # --------------------------------------------------------------------------
@@ -149,7 +143,7 @@ def test_search_monitor_alerts_on_best_compatible_offer(monkeypatch):
         {"titulo": "Suporte monitor 280hz 25 polegadas", "preco": 50.0, "url": "https://a/3", "loja": "amazon", "imagem": None},
     ], {}))
     texto = "monitor 280hz 25 polegadas"
-    p = monitor.new_search(texto, ai.interpret_heuristic(texto), 1000)
+    p = monitor.new_search(texto, pedido.interpret(texto), 1000)
     [r] = monitor.check_products([p], "a@b.com")
     assert r["status"] == "alerta_enviado" and r["preco_atual"] == 990.0
     assert sent == [("https://a/2", 990.0)]
@@ -210,8 +204,41 @@ def test_api_add_from_search_result_uses_known_price(client, monkeypatch):
 
 
 def test_filter_heuristic_requires_model_numbers():
-    interp = ai.interpret_heuristic("placa de vídeo RTX 4060")
+    interp = pedido.interpret("placa de vídeo RTX 4060")
     ofertas = [{"titulo": "Placa de Vídeo RTX 4060 8GB", "preco": 1900.0},
                {"titulo": "Placa de Vídeo RTX 3060 12GB", "preco": 1500.0}]
-    out = ai.filter_heuristic("placa de vídeo RTX 4060", interp, ofertas)
+    out = pedido.filter_offers("placa de vídeo RTX 4060", interp, ofertas)
     assert [o["titulo"] for o in out] == ["Placa de Vídeo RTX 4060 8GB"]
+
+
+def test_categoria_com_sinonimos_e_caracteristicas():
+    r = pedido.interpret("fone bluetooth com cancelamento de ruído até 500 reais")
+    assert r["categoria"] == "fone" and r["preco_maximo"] == 500
+    assert r["requisitos"] == ["Bluetooth", "Cancelamento de ruído"]
+    ofertas = [
+        {"titulo": "Headset Bluetooth JBL Tune com Cancelamento de Ruído", "preco": 399.0},
+        {"titulo": "Fone Sony WH-1000XM4 Bluetooth Noise Cancelling ANC", "preco": 450.0},
+        {"titulo": "Fone de Ouvido Bluetooth com ANC Xiaomi", "preco": 199.0},
+        {"titulo": "Fone Bluetooth simples", "preco": 59.0},
+        {"titulo": "Capa para fone bluetooth com cancelamento de ruido", "preco": 19.0},
+        {"titulo": "Teclado bluetooth", "preco": 99.0},
+    ]
+    out = pedido.filter_offers("fone bluetooth com cancelamento de ruído", r, ofertas)
+    assert [o["preco"] for o in out] == [199.0, 399.0, 450.0]
+    assert "Bluetooth" in out[0]["motivo"]
+
+
+def test_placa_de_video_categoria_multipalavra():
+    r = pedido.interpret("placa de vídeo RTX 4060")
+    assert r["categoria"] == "placa de video"
+    ofertas = [{"titulo": "Placa de Vídeo MSI GeForce RTX 4060 Ventus 8GB", "preco": 1900.0},
+               {"titulo": "GPU Gigabyte RTX 4060 Eagle", "preco": 1850.0},
+               {"titulo": "Placa Mãe B550", "preco": 700.0}]
+    out = pedido.filter_offers("placa de vídeo RTX 4060", r, ofertas)
+    assert [o["preco"] for o in out] == [1850.0, 1900.0]
+
+
+def test_remove_preco_absurdo():
+    r = pedido.interpret("ssd 1tb")
+    ofertas = [{"titulo": f"SSD 1TB modelo {i}", "preco": p} for i, p in enumerate([400, 420, 450, 39.9])]
+    assert 39.9 not in [o["preco"] for o in pedido.filter_offers("ssd 1tb", r, ofertas)]
