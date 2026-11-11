@@ -33,7 +33,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <main>{children}</main>
           <footer className="wrap footer">
             <span>Price Monitor · 100% gratuito · preços lidos direto das lojas, podem variar.</span>
-            <a href="https://github.com/jvrov/bot" target="_blank" rel="noopener noreferrer">Código no GitHub</a>
           </footer>
         </AppProvider>
       </body>

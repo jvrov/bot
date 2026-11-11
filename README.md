@@ -36,9 +36,9 @@
 
 Precisa do [Node.js](https://nodejs.org) 20 ou mais novo.
 
+Na pasta do projeto, instale as dependências:
+
 ```bash
-git clone https://github.com/jvrov/bot.git
-cd bot
 npm install
 ```
 
