@@ -1,14 +1,7 @@
 {
-    "version": 2,
-    "builds": [
-        { "src": "app.py", "use": "@vercel/python" },
-        { "src": "static/**", "use": "@vercel/static" }
-    ],
-    "routes": [
-        { "src": "/static/(.*)", "dest": "/static/$1" },
-        { "src": "/(.*)", "dest": "app.py" }
-    ],
-    "crons": [
-        { "path": "/api/cron", "schedule": "0 12 * * *" }
-    ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "crons": [
+    { "path": "/api/cron", "schedule": "0 12 * * *" }
+  ]
 }

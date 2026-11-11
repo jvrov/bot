@@ -1,12 +1,13 @@
-# Python
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.venv/
-venv/
+# Node / Next.js
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
 
 # Configuração local / segredos
 .env
+.env*.local
 data.json
 data.tmp
 

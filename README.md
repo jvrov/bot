@@ -1,91 +1,80 @@
-# 🤖 Price Monitor Bot
+# 🤖 Price Monitor
 
-> Diga o que você quer comprar (ex.: *"quero um monitor de 280Hz de 25 polegadas até R$ 1.500"*). O bot procura nas lojas, mostra só o que combina com o pedido e avisa por email quando o preço baixar.
+> Diga o que você quer comprar (ex.: *"quero um monitor de 280Hz de 25 polegadas até R$ 1.500"*). O Price Monitor procura nas lojas, mostra só o que combina com o pedido e avisa por email quando o preço baixar.
+
+**100% gratuito**: nenhuma API paga. Roda no plano grátis da Vercel, com banco grátis do Upstash e envio de email pelo Gmail.
 
 ## ✨ Funcionalidades
 
-- 💬 **Busca em linguagem natural** — escreva o que você quer; o bot entende as especificações (medidas, modelo, características e preço), busca na KaBuM!, Mercado Livre, Amazon e Magalu e filtra só os anúncios compatíveis (sem acessórios nem modelos errados)
-- 📡 **Vigiar uma busca inteira** — avisa quando *qualquer* produto compatível, em qualquer loja, ficar abaixo do seu preço
-- 🔗 Também aceita **link de um produto específico** (nome e preço detectados automaticamente)
-- 🛒 **Lojas suportadas**: Amazon, Mercado Livre, KaBuM! e Magazine Luiza (e outras lojas que publicam dados estruturados `schema.org/Product`)
-- 📈 **Histórico de preços** com gráfico, menor/maior preço e mini-gráfico em cada produto
-- 🔔 **Alertas por email** (HTML) — enviados **uma vez por queda**, sem spam a cada verificação
-- ✏️ Editar nome/preço alvo, verificar um produto só, buscar e ordenar a lista
-- ⏰ **Verificação automática** diária via Vercel Cron (`/api/cron`)
-- 🌓 Tema claro/escuro (segue o sistema) e layout responsivo
-- 💻 **CLI** (`price_monitor.py`) para rodar no terminal ou em loop
+**Tela de busca (`/buscar`)**
+- 💬 Busca em linguagem natural: entende tipo de produto (com sinônimos), medidas (Hz, polegadas, GB, TB…), modelos (RTX 4060), características (Bluetooth, NVMe, IPS, 4K…) e preço máximo
+- 🛒 Procura na KaBuM!, Mercado Livre, Amazon e Magazine Luiza ao mesmo tempo, mostrando o andamento de cada loja
+- 🎯 Mostra só os anúncios compatíveis (sem acessórios, modelos ou medidas erradas)
+- ↕️ Ordenar por relevância, menor/maior preço, **anúncios mais recentes**, loja ou nome
+- 🧰 Filtros por loja, faixa de preço, "só até meu preço" e compatibilidade
+- 🔔 Vigiar um produto específico ou **a busca inteira** (avisa quando *qualquer* produto compatível ficar abaixo do seu preço)
+- 🔗 Também aceita o link de um produto
 
-## 💸 100% gratuito
+**Tela de alertas (`/alertas`)**
+- 📈 Preço atual, queda desde o início, menor preço, mini-gráfico e histórico completo
+- ↕️ Ordenar por proximidade do alvo, preço, maior queda, ofertas novas, criação, última verificação ou nome
+- 🆕 Alertas de busca marcam as **ofertas novas** que apareceram desde a última verificação
+- ⏰ Verificação automática diária (Vercel Cron) + botão "Verificar agora"
+- 🔑 Código de acesso para abrir os mesmos alertas em outro aparelho
 
-Não usa nenhuma API paga. Roda no plano grátis da Vercel, com banco grátis do Upstash e envio de email pelo Gmail.
+> **Sobre "anúncios mais recentes":** as lojas não mostram a data do anúncio na busca. A ordem é estimada pelo número do anúncio (KaBuM! e Mercado Livre numeram em sequência). Amazon e Magalu ficam por último.
 
 ## 🛠️ Tecnologias
 
-Python (Flask, Requests, BeautifulSoup) · Redis (opcional) · HTML/CSS/JS puro · Font Awesome
+- **Next.js 15** (React 19 + Node.js) com TypeScript
+- Rotas de API do Next.js (Node.js) para busca, alertas e cron
+- **cheerio** para ler as páginas das lojas, **nodemailer** para os emails
+- **Upstash Redis** (opcional) para guardar os dados
+- **Vitest** para os testes, **lucide-react** para os ícones
 
-## 🚀 Como usar
+## 🚀 Rodando localmente
+
+Precisa do [Node.js](https://nodejs.org) 20 ou mais novo.
 
 ```bash
 git clone https://github.com/jvrov/bot.git
 cd bot
-python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+npm install
 ```
-
-Configure as variáveis de ambiente (veja `.env.example`):
-
-| Variável | Para quê |
-|---|---|
-| `EMAIL_USER` / `EMAIL_PASSWORD` | Conta que envia os alertas. No Gmail use uma [senha de app](https://myaccount.google.com/apppasswords). |
-| `REDIS_URL` | Banco Redis (ex.: Upstash). **Opcional** — sem ele os dados ficam em `data.json`. |
-| `CRON_SECRET` | Protege a rota de verificação automática `/api/cron`. |
 
 ```bash
-export EMAIL_USER="seu-bot@gmail.com"
-export EMAIL_PASSWORD="xxxx xxxx xxxx xxxx"
-python app.py
+npm run dev
 ```
 
-Abra [http://localhost:5000](http://localhost:5000).
+Abra [http://localhost:3000](http://localhost:3000). Sem configurar nada, os dados ficam em `data.json`.
 
-### Linha de comando
-
-```bash
-python price_monitor.py --email voce@exemplo.com            # verifica produtos.json uma vez
-python price_monitor.py --email voce@exemplo.com --loop 60  # a cada 60 min
-python price_monitor.py --email voce@exemplo.com --testar-email
-```
+Para enviar emails, crie um arquivo `.env.local` com base no `.env.example`.
 
 ### Testes
 
 ```bash
-pip install -r requirements-dev.txt
-pytest
+npm test
 ```
 
 ## ☁️ Deploy na Vercel
 
-1. Importe o repositório na Vercel.
-2. Em *Settings → Environment Variables* defina `EMAIL_USER`, `EMAIL_PASSWORD`, `REDIS_URL` e `CRON_SECRET`.
-3. O `vercel.json` já agenda `/api/cron` uma vez por dia (12:00 UTC). A Vercel envia o `CRON_SECRET` automaticamente.
-
-> ⚠️ Na Vercel o disco não é persistente: configure o `REDIS_URL` para não perder os dados.
->
-> ⏱️ Ative o **Fluid Compute** (*Settings → Functions*) para as buscas e a verificação diária terem tempo suficiente para rodar.
+1. Importe o repositório na Vercel (o `vercel.json` já define o framework Next.js).
+2. Em **Storage**, crie um banco **Upstash for Redis** (Free) e conecte ao projeto.
+3. Em **Settings → Environment Variables**, defina `EMAIL_USER`, `EMAIL_PASSWORD` e `CRON_SECRET`.
+4. A verificação automática roda todo dia às 12:00 UTC (9h de Brasília).
 
 ## 📁 Estrutura
 
 ```
-app.py            # rotas web + API JSON
-scraper.py        # leitura de preço/nome da página de um produto
-search.py         # busca por termo nas lojas
-pedido.py         # entende o pedido e filtra os anúncios compatíveis
-monitor.py        # regras de verificação, histórico e alertas
-notifier.py       # envio de emails (SMTP)
-storage.py        # Redis ou arquivo JSON local
-price_monitor.py  # CLI
-templates/ static/  # interface
-tests/            # testes (pytest)
+src/app/                 páginas (/buscar, /alertas) e rotas de API (/api/...)
+src/components/          componentes React (telas, cards, diálogos)
+src/lib/pedido.ts        entende o pedido e filtra os anúncios compatíveis
+src/lib/search.ts        busca por termo em cada loja
+src/lib/scraper.ts       lê preço/nome da página de um produto
+src/lib/monitor.ts       histórico, alertas e alertas de busca
+src/lib/notifier.ts      envio de emails
+src/lib/storage.ts       Upstash Redis ou arquivo local
+tests/                   testes (Vitest)
 ```
 
 ## 🌐 Demonstração
