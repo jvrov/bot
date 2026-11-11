@@ -188,3 +188,11 @@ def test_cron_requires_secret(client, monkeypatch):
 def test_home_renders(client):
     r = client.get("/")
     assert r.status_code == 200 and b"Price Monitor" in r.data
+
+
+def test_health_reports_config_without_values(client, monkeypatch):
+    monkeypatch.setenv("EMAIL_USER", "bot@x.com")
+    monkeypatch.setenv("EMAIL_PASSWORD", "segredo")
+    r = client.get("/health").json
+    assert r["email_configurado"] is True and r["banco"] == "JSONFileStore"
+    assert "segredo" not in json.dumps(r)

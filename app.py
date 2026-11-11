@@ -109,7 +109,16 @@ def home():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "ok"})
+    """Diagnóstico rápido: mostra o que está configurado (nunca os valores)."""
+    return jsonify({
+        "status": "ok",
+        "email_configurado": notifier.is_configured(),
+        "email_user_definido": bool(os.getenv("EMAIL_USER")),
+        "email_password_definido": bool(os.getenv("EMAIL_PASSWORD")),
+        "banco": type(repo.store).__name__,
+        "cron_configurado": bool(os.getenv("CRON_SECRET")),
+        "ambiente": os.getenv("VERCEL_ENV", "local"),
+    })
 
 
 # ----------------------------------------------------------------------------
