@@ -1,0 +1,148 @@
+:root {
+    --brand: #2563eb;
+    --brand-2: #7c3aed;
+    --ok: #059669;
+    --warn: #d97706;
+    --bad: #dc2626;
+    --page-bg: #f4f6fb;
+    --card-bg: #ffffff;
+    --card-border: #e6e9f2;
+    --muted: #6b7280;
+}
+
+[data-bs-theme="dark"] {
+    --page-bg: #0d1117;
+    --card-bg: #161b22;
+    --card-border: #2a313c;
+    --muted: #9aa4b2;
+    --ok: #34d399;
+    --warn: #fbbf24;
+    --bad: #f87171;
+}
+
+body {
+    font-family: 'Poppins', system-ui, sans-serif;
+    background: var(--page-bg);
+    min-height: 100vh;
+}
+
+/* Navbar + hero */
+.app-navbar {
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
+    padding: .9rem 0;
+}
+.app-navbar .navbar-brand { color: #fff; font-weight: 600; font-size: 1.3rem; }
+.btn-icon {
+    width: 40px; height: 40px; border-radius: 50%;
+    color: #fff; background: rgba(255, 255, 255, .15); border: 0;
+}
+.btn-icon:hover { background: rgba(255, 255, 255, .28); color: #fff; }
+
+.hero {
+    background: linear-gradient(120deg, var(--brand), var(--brand-2));
+    color: #fff;
+    padding: 2rem 0 5rem;
+    margin-bottom: -3.5rem;
+}
+.hero h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+.hero .lead { opacity: .9; }
+
+/* Cards */
+.app-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    box-shadow: 0 6px 24px rgba(15, 23, 42, .06);
+}
+.card-title { font-weight: 600; margin-bottom: 1rem; }
+
+.stat-card {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 1rem;
+    padding: 1rem 1.2rem;
+    height: 100%;
+    box-shadow: 0 6px 24px rgba(15, 23, 42, .06);
+}
+.stat-card > i {
+    font-size: 1.3rem; width: 44px; height: 44px; flex-shrink: 0;
+    display: grid; place-items: center; border-radius: .8rem;
+    color: var(--brand); background: color-mix(in srgb, var(--brand) 14%, transparent);
+}
+.stat-success > i { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.stat-warning > i { color: var(--warn); background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.stat-info > i { color: var(--brand-2); background: color-mix(in srgb, var(--brand-2) 14%, transparent); }
+.stat-value { font-size: 1.45rem; font-weight: 700; line-height: 1.2; }
+.stat-value.small-value { font-size: 1rem; }
+.stat-label { font-size: .8rem; color: var(--muted); }
+
+/* Lojas */
+.store-chip {
+    font-size: .8rem; font-weight: 500;
+    padding: .3rem .7rem; border-radius: 999px;
+    background: color-mix(in srgb, var(--chip, var(--brand)) 15%, transparent);
+    color: var(--chip, var(--brand));
+}
+.store-amazon { --chip: #f59e0b; }
+.store-mercadolivre { --chip: #ca8a04; }
+.store-kabum { --chip: #ea580c; }
+.store-magazineluiza { --chip: #2563eb; }
+
+/* Produtos */
+.produto {
+    border: 1px solid var(--card-border);
+    border-radius: .9rem;
+    padding: 1rem;
+    margin-bottom: .8rem;
+    transition: border-color .2s, transform .2s;
+    animation: fadeUp .3s ease both;
+}
+.produto:hover { border-color: color-mix(in srgb, var(--brand) 45%, var(--card-border)); }
+.produto.no-alvo { border-left: 4px solid var(--ok); }
+.produto.com-erro { border-left: 4px solid var(--bad); }
+
+.produto-nome {
+    font-weight: 600; font-size: .98rem; margin: 0;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.produto-meta { font-size: .78rem; color: var(--muted); }
+.preco-atual { font-size: 1.35rem; font-weight: 700; }
+.preco-alvo { font-size: .85rem; color: var(--muted); }
+.badge-status { font-size: .72rem; font-weight: 500; padding: .35em .65em; border-radius: 999px; }
+.badge-ok { background: color-mix(in srgb, var(--ok) 15%, transparent); color: var(--ok); }
+.badge-wait { background: color-mix(in srgb, var(--brand) 13%, transparent); color: var(--brand); }
+.badge-bad { background: color-mix(in srgb, var(--bad) 15%, transparent); color: var(--bad); }
+.badge-new { background: color-mix(in srgb, var(--muted) 15%, transparent); color: var(--muted); }
+
+.progress-alvo { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--muted) 18%, transparent); }
+.progress-alvo .progress-bar { border-radius: 999px; }
+
+.sparkline { width: 110px; height: 34px; }
+.sparkline path { fill: none; stroke: var(--brand); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.sparkline .alvo { stroke: var(--ok); stroke-width: 1; stroke-dasharray: 3 3; }
+
+.produto-acoes .btn { width: 34px; height: 34px; padding: 0; display: inline-grid; place-items: center; }
+
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+.empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: .6; }
+
+/* Gráfico do histórico */
+.chart { width: 100%; height: 260px; }
+.chart .grid line { stroke: var(--card-border); }
+.chart text { fill: var(--muted); font-size: 11px; font-family: inherit; }
+.chart .linha { fill: none; stroke: var(--brand); stroke-width: 2.5; stroke-linejoin: round; }
+.chart .area { fill: color-mix(in srgb, var(--brand) 12%, transparent); }
+.chart .alvo { stroke: var(--ok); stroke-width: 1.5; stroke-dasharray: 6 4; }
+.chart circle { fill: var(--brand); }
+
+.form-control:focus, .form-select:focus { box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--brand) 25%, transparent); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 575.98px) {
+    .sparkline { display: none; }
+    .stat-card { padding: .8rem; gap: .6rem; }
+    .stat-card > i { width: 36px; height: 36px; font-size: 1rem; }
+    .stat-value { font-size: 1.15rem; }
+}

@@ -1,1 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Configuração local / segredos
+.env
+data.json
+data.tmp
+
+# Vercel
 .vercel
