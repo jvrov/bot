@@ -3,177 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Price Monitor Bot</title>
-    <meta name="description" content="Monitore preços de produtos online e receba alertas por email.">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📉</text></svg>">
+    <title>Price Monitor</title>
+    <meta name="description" content="Diga o que você quer comprar. O Price Monitor encontra nas lojas e avisa quando o preço baixar.">
+    <meta name="theme-color" content="#4f46e5">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='9' fill='%234f46e5'/><path d='M7 20l6-6 4 4 8-8' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
     <script>
-        // Aplica o tema antes de renderizar para evitar "piscar".
         (function () {
             var t = null;
             try { t = localStorage.getItem('theme'); } catch (e) {}
             if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            document.documentElement.setAttribute('data-bs-theme', t);
+            document.documentElement.dataset.theme = t;
         })();
     </script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
 </head>
 <body>
-    <nav class="navbar app-navbar">
-        <div class="container">
-            <span class="navbar-brand"><i class="fas fa-chart-line me-2"></i>Price Monitor</span>
-            <button class="btn btn-icon" id="themeToggle" type="button" aria-label="Alternar tema">
-                <i class="fas fa-moon"></i>
-            </button>
-        </div>
-    </nav>
-
-    <header class="hero">
-        <div class="container">
-            <h1 class="fw-bold mb-2">Pague menos no que você quer.</h1>
-            <p class="lead mb-0">Cole o link do produto, defina seu preço e receba um email quando ele baixar.</p>
+    <header class="topbar">
+        <div class="wrap topbar-inner">
+            <a class="brand" href="/">
+                <span class="brand-mark"><i class="fa-solid fa-arrow-trend-down"></i></span>
+                <span>Price Monitor</span>
+            </a>
+            <nav class="topbar-actions">
+                <a class="btn btn-ghost hide-sm" href="#painel">Meus alertas <span class="count-pill" id="navCount">0</span></a>
+                <button class="btn btn-ghost" id="btnConfig" type="button">
+                    <span class="status-dot" id="emailDot"></span><span class="hide-sm" id="emailLabel">Configurar email</span>
+                    <i class="fa-regular fa-envelope show-sm"></i>
+                </button>
+                <button class="icon-btn" id="themeToggle" type="button" aria-label="Alternar tema"><i class="fa-solid fa-moon"></i></button>
+            </nav>
         </div>
     </header>
 
-    <main class="container pb-5">
-        <!-- Estatísticas -->
-        <section class="row g-3 mb-4 stats-row">
-            <div class="col-6 col-lg-3">
-                <div class="stat-card"><i class="fas fa-box"></i>
-                    <div><div class="stat-value" id="statTotal">0</div><div class="stat-label">Produtos</div></div>
+    <main>
+        <!-- ============ HERO / BUSCA ============ -->
+        <section class="hero">
+            <div class="hero-glow" aria-hidden="true"></div>
+            <div class="wrap hero-inner">
+                <span class="eyebrow"><i class="fa-solid fa-wand-magic-sparkles"></i> <span id="iaBadge">Busca inteligente</span></span>
+                <h1>Diga o que você quer.<br><span class="grad">A gente acha e vigia o preço.</span></h1>
+                <p class="lead">Procuramos na KaBuM!, Mercado Livre, Amazon e Magalu, mostramos só o que combina com o seu pedido e avisamos por email quando o preço cair.</p>
+
+                <form class="composer" id="composer" autocomplete="off">
+                    <i class="fa-solid fa-magnifying-glass composer-icon"></i>
+                    <textarea id="pedido" rows="1" maxlength="500" placeholder="Ex.: quero um monitor de 280Hz de 25 polegadas até R$ 1.500" aria-label="O que você procura?"></textarea>
+                    <button class="btn btn-primary btn-lg" type="submit" id="btnBuscar">
+                        <span>Buscar</span><i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </form>
+                <div class="examples" id="exemplos">
+                    <span class="examples-label">Experimente:</span>
+                    <button type="button" class="chip">monitor 280Hz 25 polegadas até R$ 1.500</button>
+                    <button type="button" class="chip">SSD NVMe 1TB</button>
+                    <button type="button" class="chip">fone bluetooth com cancelamento de ruído até 500 reais</button>
+                    <button type="button" class="chip">placa de vídeo RTX 4060</button>
                 </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="stat-card stat-success"><i class="fas fa-bullseye"></i>
-                    <div><div class="stat-value" id="statAbaixo">0</div><div class="stat-label">No preço alvo</div></div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="stat-card stat-warning"><i class="fas fa-arrow-trend-down"></i>
-                    <div><div class="stat-value" id="statFalta">—</div><div class="stat-label">Falta p/ o alvo (total)</div></div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="stat-card stat-info"><i class="fas fa-clock"></i>
-                    <div><div class="stat-value small-value" id="statUltima">nunca</div><div class="stat-label">Última verificação</div></div>
-                </div>
+                <p class="hint"><i class="fa-solid fa-link"></i> Também pode colar o link de um produto específico.</p>
             </div>
         </section>
 
-        <div class="row g-4">
-            <!-- Coluna lateral -->
-            <aside class="col-lg-4">
-                <div class="card app-card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-plus-circle me-2 text-primary"></i>Novo produto</h5>
-                        <form id="formProduto" novalidate>
-                            <div class="mb-3">
-                                <label for="url" class="form-label">Link do produto</label>
-                                <input type="url" class="form-control" id="url" placeholder="https://www.kabum.com.br/produto/..." required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="preco_desejado" class="form-label">Preço desejado</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">R$</span>
-                                    <input type="text" inputmode="decimal" class="form-control" id="preco_desejado" placeholder="1.999,90" required>
-                                </div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="nome" class="form-label">Nome <span class="text-body-secondary fw-normal">(opcional)</span></label>
-                                <input type="text" class="form-control" id="nome" maxlength="200" placeholder="Detectado automaticamente">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-plus me-2"></i>Adicionar e verificar
-                            </button>
-                        </form>
-                    </div>
+        <!-- ============ RESULTADOS ============ -->
+        <section class="wrap results hidden" id="resultados" aria-live="polite">
+            <div class="results-head">
+                <div>
+                    <h2 id="resumoBusca">Buscando…</h2>
+                    <div class="tags" id="tagsBusca"></div>
                 </div>
+                <button class="btn btn-ghost" id="btnFecharBusca" type="button"><i class="fa-solid fa-xmark"></i> Fechar</button>
+            </div>
 
-                <div class="card app-card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-envelope me-2 text-primary"></i>Alertas por email</h5>
-                        <form id="formEmail" novalidate>
-                            <div class="input-group mb-2">
-                                <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
-                                <button class="btn btn-outline-primary" type="submit">Salvar</button>
-                            </div>
-                        </form>
-                        <button class="btn btn-link btn-sm px-0" id="btnTesteEmail" type="button">
-                            <i class="fas fa-paper-plane me-1"></i>Enviar email de teste
-                        </button>
-                        <div class="alert alert-warning small mt-2 mb-0 d-none" id="avisoEmail">
-                            <i class="fas fa-triangle-exclamation me-1"></i>
-                            O servidor ainda não tem remetente configurado; os alertas não serão enviados.
-                        </div>
-                    </div>
-                </div>
+            <ol class="steps" id="passos"></ol>
 
-                <div class="card app-card">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-store me-2 text-primary"></i>Lojas suportadas</h5>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for chave, nome in lojas.items() %}
-                            <span class="store-chip store-{{ chave }}">{{ nome }}</span>
-                            {% endfor %}
-                        </div>
-                        <p class="small text-body-secondary mt-3 mb-0">
-                            Outras lojas também podem funcionar se a página publicar o preço em dados estruturados.
-                        </p>
-                    </div>
+            <div class="watch-card hidden" id="vigiarBusca">
+                <div class="watch-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="watch-text">
+                    <strong>Vigiar esta busca</strong>
+                    <span id="vigiarTexto">Aviso quando qualquer produto compatível ficar abaixo do seu preço, em qualquer loja.</span>
                 </div>
-            </aside>
+                <form class="watch-form" id="formVigiar">
+                    <label class="money-input">
+                        <span>R$</span>
+                        <input type="text" inputmode="decimal" id="alvoBusca" placeholder="Preço alvo" aria-label="Preço alvo">
+                    </label>
+                    <button class="btn btn-primary" type="submit"><i class="fa-solid fa-bell"></i> Criar alerta</button>
+                </form>
+            </div>
 
-            <!-- Lista de produtos -->
-            <section class="col-lg-8">
-                <div class="card app-card">
-                    <div class="card-body">
-                        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between mb-3">
-                            <h5 class="card-title mb-0"><i class="fas fa-list me-2 text-primary"></i>Meus produtos</h5>
-                            <button class="btn btn-primary" id="btnVerificar" type="button">
-                                <i class="fas fa-rotate me-2"></i>Verificar preços
-                            </button>
-                        </div>
-                        <div class="d-flex flex-wrap gap-2 mb-3" id="toolbar">
-                            <input type="search" class="form-control form-control-sm flex-grow-1" id="busca" placeholder="Buscar produto..." style="max-width: 260px">
-                            <select class="form-select form-select-sm w-auto" id="ordem" aria-label="Ordenar">
-                                <option value="recentes">Mais recentes</option>
-                                <option value="proximos">Mais perto do alvo</option>
-                                <option value="preco">Menor preço</option>
-                                <option value="nome">Nome (A-Z)</option>
-                            </select>
-                        </div>
-                        <div id="listaProdutos">
-                            <div class="text-center py-5 text-body-secondary">
-                                <div class="spinner-border spinner-border-sm me-2"></div>Carregando...
-                            </div>
-                        </div>
-                    </div>
+            <div class="toolbar hidden" id="barraResultados">
+                <span class="muted" id="contagem"></span>
+                <div class="seg" id="ordemResultados" role="tablist">
+                    <button class="active" data-ordem="preco" type="button">Menor preço</button>
+                    <button data-ordem="loja" type="button">Por loja</button>
                 </div>
-            </section>
-        </div>
+            </div>
+            <div class="grid offers" id="gradeOfertas"></div>
+        </section>
+
+        <!-- ============ PAINEL ============ -->
+        <section class="wrap dashboard" id="painel">
+            <div class="section-head">
+                <div>
+                    <h2>Meus alertas</h2>
+                    <p class="muted">Verificados automaticamente todo dia. Você também pode verificar agora.</p>
+                </div>
+                <button class="btn btn-secondary" id="btnVerificar" type="button"><i class="fa-solid fa-rotate"></i> Verificar agora</button>
+            </div>
+
+            <div class="stats">
+                <div class="stat"><span class="stat-label">Alertas ativos</span><span class="stat-value" id="statTotal">0</span></div>
+                <div class="stat stat-ok"><span class="stat-label">No preço que você quer</span><span class="stat-value" id="statAlvo">0</span></div>
+                <div class="stat"><span class="stat-label">Falta para os alvos</span><span class="stat-value" id="statEconomia">—</span></div>
+                <div class="stat"><span class="stat-label">Última verificação</span><span class="stat-value small" id="statUltima">—</span></div>
+            </div>
+
+            <div class="toolbar">
+                <div class="seg" id="filtroPainel" role="tablist">
+                    <button class="active" data-filtro="todos" type="button">Todos</button>
+                    <button data-filtro="alvo" type="button">No alvo</button>
+                    <button data-filtro="busca" type="button">Buscas</button>
+                    <button data-filtro="link" type="button">Produtos</button>
+                </div>
+                <input class="input input-sm" type="search" id="filtroTexto" placeholder="Filtrar…" aria-label="Filtrar alertas">
+            </div>
+            <div class="grid items" id="listaItens"></div>
+        </section>
     </main>
 
-    <footer class="text-center text-body-secondary small pb-4">
-        Price Monitor Bot · os preços são lidos diretamente das lojas e podem variar.
+    <footer class="wrap footer">
+        <span>Price Monitor · preços lidos diretamente das lojas, podem variar.</span>
+        <a href="https://github.com/jvrov/bot" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i> Código</a>
     </footer>
 
-    <!-- Modal histórico -->
-    <div class="modal fade" id="historicoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="historicoTitulo">Histórico</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                </div>
-                <div class="modal-body" id="historicoCorpo"></div>
-            </div>
-        </div>
-    </div>
+    <!-- Diálogo genérico -->
+    <dialog class="dialog" id="dialogo">
+        <form method="dialog" class="dialog-inner" id="dialogoForm">
+            <header class="dialog-head">
+                <h3 id="dialogoTitulo"></h3>
+                <button class="icon-btn" value="cancel" formnovalidate aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button>
+            </header>
+            <div class="dialog-body" id="dialogoCorpo"></div>
+            <footer class="dialog-foot" id="dialogoRodape"></footer>
+        </form>
+    </dialog>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.4/dist/sweetalert2.all.min.js"></script>
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

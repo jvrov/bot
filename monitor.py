@@ -7,8 +7,10 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
+import ai
 import notifier
 import scraper
+import search
 
 logger = logging.getLogger(__name__)
 
@@ -36,13 +38,64 @@ def normalize_product(raw: dict) -> dict:
     product.setdefault("historico", [])
     product.setdefault("alertado", False)
     product.setdefault("erro", None)
+    product.setdefault("tipo", "link")
+    product.setdefault("imagem", None)
+    if product["tipo"] == "busca":
+        product.setdefault("texto", product["nome"])
+        product.setdefault("interpretacao", {})
+        product.setdefault("melhor_oferta", None)
+        product.setdefault("ofertas", [])
     return product
 
 
-def new_product(nome: str, url: str, preco_desejado: float) -> dict:
+def new_product(nome: str, url: str, preco_desejado: float, imagem: str | None = None) -> dict:
     return normalize_product(
-        {"nome": nome.strip(), "url": url.strip(), "preco_desejado": preco_desejado}
+        {"nome": nome.strip(), "url": url.strip(), "preco_desejado": preco_desejado,
+         "imagem": imagem}
     )
+
+
+def new_search(texto: str, interpretacao: dict, preco_desejado: float) -> dict:
+    """Um monitor de busca: avisa quando QUALQUER oferta compatível ficar abaixo do alvo."""
+    return normalize_product({
+        "tipo": "busca",
+        "nome": texto.strip(),
+        "texto": texto.strip(),
+        "url": "",
+        "interpretacao": {k: interpretacao.get(k) for k in
+                          ("termo_busca", "categoria", "requisitos", "preco_maximo", "resumo")},
+        "preco_desejado": preco_desejado,
+    })
+
+
+def update_search_offers(product: dict, ofertas: list[dict]) -> scraper.ScrapeResult:
+    """Guarda as melhores ofertas compatíveis e devolve o melhor preço como resultado."""
+    ofertas = sorted(ofertas, key=lambda o: o["preco"])
+    product["ofertas"] = ofertas[:8]
+    if not ofertas:
+        return scraper.ScrapeResult(price=None, error="Nenhuma oferta compatível encontrada agora")
+    best = ofertas[0]
+    product["melhor_oferta"] = best
+    product["url"] = best["url"]
+    product["imagem"] = best.get("imagem") or product.get("imagem")
+    return scraper.ScrapeResult(price=best["preco"], name=best["titulo"])
+
+
+def run_search(product: dict) -> scraper.ScrapeResult:
+    interp = product.get("interpretacao") or {}
+    termo = interp.get("termo_busca") or product["texto"]
+    ofertas, erros = search.search_all(termo)
+    if not ofertas:
+        detalhe = "; ".join(f"{search.SUPPORTED_STORES[k]}: {v}" for k, v in erros.items())
+        return scraper.ScrapeResult(price=None, error=f"Nenhuma loja respondeu ({detalhe})")
+    compativeis, _ = ai.filter_offers(product["texto"], interp, ofertas)
+    return update_search_offers(product, compativeis)
+
+
+def _fetch(product: dict) -> scraper.ScrapeResult:
+    if product.get("tipo") == "busca":
+        return run_search(product)
+    return scraper.fetch_product(product["url"])
 
 
 def apply_result(product: dict, result: scraper.ScrapeResult, email: str | None) -> dict:
@@ -95,5 +148,5 @@ def check_products(products: list[dict], email: str | None) -> list[dict]:
     if not products:
         return []
     with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, len(products))) as pool:
-        scraped = list(pool.map(lambda p: scraper.fetch_product(p["url"]), products))
+        scraped = list(pool.map(_fetch, products))
     return [apply_result(p, r, email) for p, r in zip(products, scraped)]

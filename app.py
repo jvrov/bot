@@ -11,9 +11,11 @@ from functools import wraps
 
 from flask import Flask, g, jsonify, render_template, request
 
+import ai
 import monitor
 import notifier
 import scraper
+import search
 from storage import UserRepository, create_store
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
@@ -24,7 +26,7 @@ repo = UserRepository(create_store())
 
 COOKIE_NAME = "uid"
 COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 2  # 2 anos
-MAX_PRODUCTS = 30
+MAX_PRODUCTS = 40
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 UID_RE = re.compile(r"^[a-f0-9]{32}$")
 
@@ -117,6 +119,7 @@ def health():
         "email_password_definido": bool(os.getenv("EMAIL_PASSWORD")),
         "banco": type(repo.store).__name__,
         "cron_configurado": bool(os.getenv("CRON_SECRET")),
+        "ia_configurada": ai.ai_enabled(),
         "ambiente": os.getenv("VERCEL_ENV", "local"),
     })
 
@@ -133,7 +136,78 @@ def estado():
         "email_configurado": notifier.is_configured(),
         "produtos": load_products(),
         "lojas": scraper.SUPPORTED_STORES,
+        "lojas_busca": list(search.STORES),
+        "ia": ai.ai_enabled(),
     })
+
+
+# ---------------------------------------------------------------------------
+# Busca em linguagem natural (o navegador chama uma etapa por vez, para cada
+# requisição ser curta e caber no limite de tempo da Vercel)
+# ---------------------------------------------------------------------------
+
+def _clean_offer(o) -> dict | None:
+    if not isinstance(o, dict):
+        return None
+    url, imagem = str(o.get("url") or ""), o.get("imagem")
+    preco = parse_target_price(o.get("preco"))
+    if not scraper.is_valid_url(url) or preco is None or o.get("loja") not in scraper.SUPPORTED_STORES:
+        return None
+    if not (isinstance(imagem, str) and scraper.is_valid_url(imagem)):
+        imagem = None
+    return {"titulo": str(o.get("titulo") or "")[:220], "preco": preco, "url": url,
+            "loja": o["loja"], "imagem": imagem, "motivo": str(o.get("motivo") or "")[:80]}
+
+
+def _clean_interp(data) -> dict:
+    data = data if isinstance(data, dict) else {}
+    reqs = data.get("requisitos") if isinstance(data.get("requisitos"), list) else []
+    preco = data.get("preco_maximo")
+    return {
+        "termo_busca": str(data.get("termo_busca") or "")[:120],
+        "categoria": str(data.get("categoria") or "")[:60],
+        "requisitos": [str(r)[:120] for r in reqs[:10]],
+        "preco_maximo": parse_target_price(preco) if preco is not None else None,
+        "resumo": str(data.get("resumo") or "")[:200],
+    }
+
+
+@app.post("/api/interpretar")
+@json_body
+def interpretar():
+    texto = (request.get_json().get("texto") or "").strip()
+    if len(texto) < 3:
+        return error("Descreva o que você procura")
+    return jsonify({"success": True, "interpretacao": ai.interpret(texto)})
+
+
+@app.post("/api/buscar")
+@json_body
+def buscar():
+    data = request.get_json()
+    termo = (data.get("termo") or "").strip()[:120]
+    loja = data.get("loja")
+    if not termo:
+        return error("Informe o termo de busca")
+    if loja not in search.STORES:
+        return error("Loja não suportada")
+    try:
+        ofertas = search.search_store(loja, termo)
+    except search.SearchError as exc:
+        return jsonify({"success": True, "loja": loja, "ofertas": [], "erro": str(exc)})
+    return jsonify({"success": True, "loja": loja, "ofertas": ofertas, "erro": None})
+
+
+@app.post("/api/filtrar")
+@json_body
+def filtrar():
+    data = request.get_json()
+    texto = (data.get("texto") or "").strip()[:500]
+    interp = _clean_interp(data.get("interpretacao"))
+    ofertas = [o for o in map(_clean_offer, (data.get("ofertas") or [])[:200]) if o] \
+        if isinstance(data.get("ofertas"), list) else []
+    compativeis, usou_ia = ai.filter_offers(texto, interp, ofertas)
+    return jsonify({"success": True, "ofertas": compativeis, "total": len(ofertas), "ia": usou_ia})
 
 
 @app.post("/api/email")
@@ -163,32 +237,44 @@ def testar_email():
 @json_body
 def adicionar_produto():
     data = request.get_json()
-    url = (data.get("url") or "").strip()
-    nome = (data.get("nome") or "").strip()[:200]
     preco = parse_target_price(data.get("preco_desejado"))
-
-    if not scraper.is_valid_url(url):
-        return error("Informe uma URL válida (começando com http:// ou https://)")
     if preco is None:
         return error("Informe um preço desejado válido")
 
     products = load_products()
     if len(products) >= MAX_PRODUCTS:
-        return error(f"Limite de {MAX_PRODUCTS} produtos atingido")
-    if any(p["url"] == url for p in products):
-        return error("Este produto já está sendo monitorado")
+        return error(f"Limite de {MAX_PRODUCTS} itens monitorados atingido")
+    email = repo.get_email(g.uid)
 
-    # Já busca o preço atual (e o nome, se não foi informado).
-    result = scraper.fetch_product(url)
-    product = monitor.new_product(nome or result.name or url, url, preco)
-    resultado = monitor.apply_result(product, result, repo.get_email(g.uid))
+    if data.get("tipo") == "busca":
+        texto = (data.get("texto") or "").strip()[:500]
+        if len(texto) < 3:
+            return error("Descreva o que você procura")
+        product = monitor.new_search(texto, _clean_interp(data.get("interpretacao")), preco)
+        ofertas = [o for o in map(_clean_offer, data.get("ofertas") or []) if o] \
+            if isinstance(data.get("ofertas"), list) else []
+        result = monitor.update_search_offers(product, ofertas) if ofertas else monitor.run_search(product)
+        message = "Busca salva! Vou avisar quando algo compatível ficar abaixo do seu preço."
+    else:
+        url = (data.get("url") or "").strip()
+        nome = (data.get("nome") or "").strip()[:200]
+        if not scraper.is_valid_url(url):
+            return error("Informe uma URL válida (começando com http:// ou https://)")
+        if any(p["url"] == url and p["tipo"] == "link" for p in products):
+            return error("Este produto já está sendo monitorado")
+        imagem = data.get("imagem") if scraper.is_valid_url(str(data.get("imagem") or "")) else None
+        preco_inicial = parse_target_price(data.get("preco_atual"))
+        # Se veio da busca, já sabemos o preço; senão, lê a página do produto.
+        result = (scraper.ScrapeResult(price=preco_inicial, name=nome) if preco_inicial
+                  else scraper.fetch_product(url))
+        product = monitor.new_product(nome or result.name or url, url, preco, imagem)
+        message = "Produto adicionado!"
+        if result.price is None:
+            message += " (Não consegui ler o preço agora; vou tentar de novo na próxima verificação.)"
 
+    resultado = monitor.apply_result(product, result, email)
     products.append(product)
     repo.save_products(g.uid, products)
-
-    message = "Produto adicionado!"
-    if result.price is None:
-        message += " (Não consegui ler o preço agora; vou tentar novamente na próxima verificação.)"
     return jsonify({"success": True, "message": message, "produto": product,
                     "resultado": resultado}), 201
 

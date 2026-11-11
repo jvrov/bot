@@ -42,6 +42,10 @@ def build_alert(destinatario: str, produto: dict, preco_atual: float) -> EmailMe
     alvo = produto["preco_desejado"]
     url = produto["url"]
     economia = max(alvo - preco_atual, 0)
+    oferta = produto.get("melhor_oferta") if produto.get("tipo") == "busca" else None
+    linha_oferta = f"Oferta encontrada: {oferta['titulo']}\n" if oferta else ""
+    html_oferta = (f'<p style="font-size:14px;color:#374151">Oferta encontrada: '
+                   f'{html.escape(oferta["titulo"])}</p>') if oferta else ""
 
     msg = EmailMessage()
     msg["Subject"] = f"🔔 Alerta de preço: {nome[:80]}"
@@ -50,6 +54,7 @@ def build_alert(destinatario: str, produto: dict, preco_atual: float) -> EmailMe
     msg.set_content(
         f"Olá! O produto que você está monitorando atingiu o preço desejado!\n\n"
         f"Produto: {nome}\n"
+        f"{linha_oferta}"
         f"Preço atual: {brl(preco_atual)}\n"
         f"Preço desejado: {brl(alvo)}\n"
         f"Link: {url}\n\n"
@@ -61,6 +66,7 @@ def build_alert(destinatario: str, produto: dict, preco_atual: float) -> EmailMe
             border:1px solid #e5e7eb;border-radius:12px">
   <h2 style="color:#2563eb;margin-top:0">🔔 Seu preço chegou!</h2>
   <p style="font-size:16px"><strong>{html.escape(nome)}</strong></p>
+  {html_oferta}
   <table style="font-size:15px;margin:16px 0">
     <tr><td style="padding:4px 12px 4px 0">Preço atual:</td>
         <td><strong style="color:#059669;font-size:20px">{brl(preco_atual)}</strong></td></tr>
